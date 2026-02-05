@@ -17,6 +17,7 @@ builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFacilityService, FacilityService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

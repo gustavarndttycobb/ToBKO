@@ -17,3 +17,11 @@ public interface IFacilityService
     Task UpdateAsync(long id, UpdateFacilityDto request);
     Task DeleteAsync(long id);
 }
+
+
+public interface IUserService
+{
+    Task<List<UserDto>> GetAllAsync();
+    Task<UserDto?> GetByIdAsync(long id);
+    Task DeleteAsync(long id);
+}
