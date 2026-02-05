@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApiProject.Models;
-using WebApiProject.Data;
+using InterviewBKO.Models;
+using InterviewBKO.Data;
 
-namespace WebApiProject.Controllers;
+namespace InterviewBKO.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize]
 public class FacilityController : ControllerBase
 {
     private readonly ILogger<FacilityController> _logger;
