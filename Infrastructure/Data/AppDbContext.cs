@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using InterviewBKO.Models;
+using InterviewBKO.Core.Entities;
 
-namespace InterviewBKO.Data;
+namespace InterviewBKO.Infrastructure.Data;
 
 public class AppDbContext : DbContext
 {
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
