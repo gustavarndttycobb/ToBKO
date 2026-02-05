@@ -16,6 +16,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+
     [HttpPost("signup")]
     public async Task<IActionResult> Signup([FromBody] SignupRequest newUser)
     {
@@ -30,4 +31,5 @@ public class AuthController : ControllerBase
         var response = await _authService.SigninAsync(credentials);
         return Ok(response);
     }
+
 }
