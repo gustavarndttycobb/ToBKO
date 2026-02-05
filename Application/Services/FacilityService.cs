@@ -21,7 +21,25 @@ public class FacilityService : IFacilityService
             Id = f.Id,
             Name = f.Name,
             IsWorking = f.IsWorking,
-            TimeRunning = f.TimeRunning
+            TimeRunning = f.TimeRunning,
+            Equipments = f.Equipments.Select(e => new EquipmentDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                SerialNumber = e.SerialNumber,
+                IsOperational = e.IsOperational,
+                FacilityId = e.FacilityId
+            }).ToList(),
+            ParentId = f.ParentId,
+            Children = f.Children.Select(c => new FacilityDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                IsWorking = c.IsWorking,
+                TimeRunning = c.TimeRunning,
+                ParentId = c.ParentId
+            }).ToList()
         }).ToList();
     }
 
@@ -35,7 +53,25 @@ public class FacilityService : IFacilityService
             Id = facility.Id,
             Name = facility.Name,
             IsWorking = facility.IsWorking,
-            TimeRunning = facility.TimeRunning
+            TimeRunning = facility.TimeRunning,
+            Equipments = facility.Equipments.Select(e => new EquipmentDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                SerialNumber = e.SerialNumber,
+                IsOperational = e.IsOperational,
+                FacilityId = e.FacilityId
+            }).ToList(),
+            ParentId = facility.ParentId,
+            Children = facility.Children.Select(c => new FacilityDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                IsWorking = c.IsWorking,
+                TimeRunning = c.TimeRunning,
+                ParentId = c.ParentId
+            }).ToList()
         };
     }
 
@@ -45,7 +81,8 @@ public class FacilityService : IFacilityService
         {
             Name = request.Name,
             IsWorking = request.IsWorking,
-            TimeRunning = request.TimeRunning
+            TimeRunning = request.TimeRunning,
+            ParentId = request.ParentId
         };
 
         await _repository.AddAsync(facility);
@@ -68,6 +105,7 @@ public class FacilityService : IFacilityService
         facility.Name = request.Name;
         facility.IsWorking = request.IsWorking;
         facility.TimeRunning = request.TimeRunning;
+        facility.ParentId = request.ParentId;
 
         await _repository.UpdateAsync(facility);
         await _repository.SaveChangesAsync();

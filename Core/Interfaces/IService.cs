@@ -18,10 +18,19 @@ public interface IFacilityService
     Task DeleteAsync(long id);
 }
 
-
 public interface IUserService
 {
     Task<List<UserDto>> GetAllAsync();
     Task<UserDto?> GetByIdAsync(long id);
+    Task DeleteAsync(long id);
+}
+
+public interface IEquipmentService
+{
+    Task<List<EquipmentDto>> GetAllAsync();
+    Task<List<EquipmentDto>> GetByFacilityIdAsync(long facilityId);
+    Task<EquipmentDto?> GetByIdAsync(long id);
+    Task<EquipmentDto> CreateAsync(CreateEquipmentDto request);
+    Task UpdateAsync(long id, UpdateEquipmentDto request);
     Task DeleteAsync(long id);
 }

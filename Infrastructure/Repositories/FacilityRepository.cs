@@ -16,12 +16,12 @@ public class FacilityRepository : IFacilityRepository
 
     public async Task<List<Facility>> GetAllAsync()
     {
-        return await _context.Facilities.ToListAsync();
+        return await _context.Facilities.Include(f => f.Equipments).Include(f => f.Children).ToListAsync();
     }
 
     public async Task<Facility?> GetByIdAsync(long id)
     {
-        return await _context.Facilities.FirstOrDefaultAsync(f => f.Id == id);
+        return await _context.Facilities.Include(f => f.Equipments).Include(f => f.Children).FirstOrDefaultAsync(f => f.Id == id);
     }
 
     public async Task AddAsync(Facility facility)
