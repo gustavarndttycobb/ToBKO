@@ -32,7 +32,7 @@ This project implements a Clean Architecture API for managing industrial facilit
     Ensure your `appsettings.json` points to a valid MySQL instance.
     ```json
     "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;Port=3306;Database=facilitydb;User=YOUR_USER;Password=YOUR_PASSWORD;"
+      "DefaultConnection": "Server=localhost;Port=3306;Database=bkodb;User=YOUR_USER;Password=YOUR_PASSWORD;"
     }
     ```
 
@@ -64,7 +64,7 @@ This project implements a Clean Architecture API for managing industrial facilit
     The API will be available at `http://localhost:5000`.
     Swagger UI: `http://localhost:5000/swagger`
 
-    *Note: The database container (`facility-mysql`) is configured to listen on port 3306.*
+    *Note: The database container (`bko-mysql`) is configured to listen on port 3306.*
 
 ## Database Scripts
 
