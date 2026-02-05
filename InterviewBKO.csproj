@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="InterviewBKO.Tests\**" />
+    <Content Remove="InterviewBKO.Tests\**" />
+    <EmbeddedResource Remove="InterviewBKO.Tests\**" />
+    <None Remove="InterviewBKO.Tests\**" />
   </ItemGroup>
 
   <ItemGroup>
