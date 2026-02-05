@@ -1,16 +1,23 @@
 using Microsoft.EntityFrameworkCore;
-using InterviewBKO.Data;
 using Microsoft.OpenApi.Models;
+using InterviewBKO.Infrastructure.Data;
+using InterviewBKO.Core.Interfaces;
+using InterviewBKO.Infrastructure.Repositories;
+using InterviewBKO.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IFacilityService, FacilityService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is missing");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
@@ -67,13 +74,11 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.Migrate();
 }
-
 
 if (app.Environment.IsDevelopment())
 {

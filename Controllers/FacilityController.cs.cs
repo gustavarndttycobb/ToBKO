@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using InterviewBKO.Models;
-using InterviewBKO.Data;
+using InterviewBKO.Application.DTOs;
+using InterviewBKO.Core.Interfaces;
 
 namespace InterviewBKO.Controllers;
 
@@ -10,27 +9,27 @@ namespace InterviewBKO.Controllers;
 [Microsoft.AspNetCore.Authorization.Authorize]
 public class FacilityController : ControllerBase
 {
+    private readonly IFacilityService _facilityService;
     private readonly ILogger<FacilityController> _logger;
-    private readonly AppDbContext _context;
 
-    public FacilityController(ILogger<FacilityController> logger, AppDbContext context)
+    public FacilityController(IFacilityService facilityService, ILogger<FacilityController> logger)
     {
+        _facilityService = facilityService;
         _logger = logger;
-        _context = context;
     }
 
     [HttpGet(Name = "GetFacilities")]
-    public async Task<ActionResult<IEnumerable<Facility>>> GetFacilities()
+    public async Task<ActionResult<List<FacilityDto>>> GetFacilities()
     {
-        var facilities = await _context.Facilities.ToListAsync();
+        var facilities = await _facilityService.GetAllAsync();
         _logger.LogInformation("Returning {Count} facilities", facilities.Count);
         return Ok(facilities);
     }
 
     [HttpGet("{id}", Name = "GetFacilityById")]
-    public async Task<ActionResult<Facility>> GetFacilityById(long id)
+    public async Task<ActionResult<FacilityDto>> GetFacilityById(int id)
     {
-        var facility = await _context.Facilities.FirstOrDefaultAsync(f => f.Id == id);
+        var facility = await _facilityService.GetByIdAsync(id);
 
         if (facility == null)
         {
@@ -43,59 +42,31 @@ public class FacilityController : ControllerBase
     }
 
     [HttpPost(Name = "CreateFacility")]
-    public async Task<ActionResult<Facility>> CreateFacility([FromBody] Facility facility)
+    public async Task<ActionResult<FacilityDto>> CreateFacility([FromBody] CreateFacilityDto facilityDto)
     {
-        facility.Id = 0;
-
-        await _context.Facilities.AddAsync(facility);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Created facility with ID {Id}", facility.Id);
-
-        return CreatedAtRoute("GetFacilityById", new { id = facility.Id }, facility);
+        var createdFacility = await _facilityService.CreateAsync(facilityDto);
+        return CreatedAtRoute("GetFacilityById", new { id = createdFacility.Id }, createdFacility);
     }
 
     [HttpPut("{id}", Name = "UpdateFacility")]
-    public async Task<IActionResult> UpdateFacility(long id, [FromBody] Facility facility)
+    public async Task<IActionResult> UpdateFacility(int id, [FromBody] UpdateFacilityDto facilityDto)
     {
-        if (id != facility.Id)
+        try
         {
-            return BadRequest("Facility ID mismatch");
+            await _facilityService.UpdateAsync(id, facilityDto);
         }
-
-        var existingFacility = await _context.Facilities.FirstOrDefaultAsync(f => f.Id == id);
-        if (existingFacility == null)
+        catch (KeyNotFoundException)
         {
-            _logger.LogWarning("Facility with ID {Id} not found for update", id);
             return NotFound();
         }
-
-        existingFacility.Name = facility.Name;
-        existingFacility.IsWorking = facility.IsWorking;
-        existingFacility.TimeRunning = facility.TimeRunning;
-
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Updated facility with ID {Id}", id);
 
         return NoContent();
     }
 
     [HttpDelete("{id}", Name = "DeleteFacility")]
-    public async Task<IActionResult> DeleteFacility(long id)
+    public async Task<IActionResult> DeleteFacility(int id)
     {
-        var facility = await _context.Facilities.FirstOrDefaultAsync(f => f.Id == id);
-        if (facility == null)
-        {
-            _logger.LogWarning("Facility with ID {Id} not found for deletion", id);
-            return NotFound();
-        }
-
-        _context.Facilities.Remove(facility);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Deleted facility with ID {Id}", id);
-
+        await _facilityService.DeleteAsync(id);
         return NoContent();
     }
 }

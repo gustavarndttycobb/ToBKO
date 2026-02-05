@@ -1,11 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using InterviewBKO.Data;
-using InterviewBKO.Models;
+using InterviewBKO.Application.DTOs;
+using InterviewBKO.Core.Interfaces;
 
 namespace InterviewBKO.Controllers;
 
@@ -13,80 +8,39 @@ namespace InterviewBKO.Controllers;
 [Route("[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AuthController> _logger;
+    private readonly IAuthService _authService;
 
-    public AuthController(AppDbContext context, IConfiguration configuration, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService)
     {
-        _context = context;
-        _configuration = configuration;
-        _logger = logger;
+        _authService = authService;
     }
 
     [HttpPost("signup")]
     public async Task<IActionResult> Signup([FromBody] SignupRequest newUser)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == newUser.Email))
+        try
         {
-            return BadRequest("User already exists.");
+            var response = await _authService.SignupAsync(newUser);
+            return CreatedAtAction(nameof(Signup), new { email = newUser.Email }, response);
         }
-
-        var user = new User
+        catch (InvalidOperationException ex)
         {
-            Email = newUser.Email,
-            FullName = newUser.FullName,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.Password)
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(Signup), new { email = user.Email }, new { email = user.Email, fullName = user.FullName });
+            return BadRequest(ex.Message);
+        }
     }
-
 
     [HttpPost("signin")]
     public async Task<IActionResult> Signin([FromBody] SigninRequest credentials)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == credentials.Email);
-
-        if (user == null || !BCrypt.Net.BCrypt.Verify(credentials.Password, user.PasswordHash))
+        try
         {
-            return Unauthorized("Invalid credentials.");
+            var response = await _authService.SigninAsync(credentials);
+            return Ok(response);
         }
-
-        var token = GenerateJwtToken(user);
-        return Ok(new { token });
-    }
-
-
-    private string GenerateJwtToken(User user)
-    {
-        var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is missing");
-        var jwtIssuer = _configuration["Jwt:Issuer"];
-        var jwtAudience = _configuration["Jwt:Audience"];
-
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
+        catch (UnauthorizedAccessException ex)
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim("id", user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: jwtIssuer,
-            audience: jwtAudience,
-            claims: claims,
-            expires: DateTime.Now.AddHours(2),
-            signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            return Unauthorized(ex.Message);
+        }
     }
-}
 
-public record SignupRequest(string Email, string Password, string FullName);
-public record SigninRequest(string Email, string Password);
+}
