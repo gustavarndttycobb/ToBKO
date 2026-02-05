@@ -51,15 +51,7 @@ public class FacilityController : ControllerBase
     [HttpPut("{id}", Name = "UpdateFacility")]
     public async Task<IActionResult> UpdateFacility(int id, [FromBody] UpdateFacilityDto facilityDto)
     {
-        try
-        {
-            await _facilityService.UpdateAsync(id, facilityDto);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-
+        await _facilityService.UpdateAsync(id, facilityDto);
         return NoContent();
     }
 
