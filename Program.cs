@@ -4,10 +4,14 @@ using InterviewBKO.Infrastructure.Data;
 using InterviewBKO.Core.Interfaces;
 using InterviewBKO.Infrastructure.Repositories;
 using InterviewBKO.Application.Services;
+using InterviewBKO.Infrastructure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -74,11 +78,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.Migrate();
 }
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -89,6 +95,8 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
